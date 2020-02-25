@@ -1,5 +1,7 @@
 ## groovy
 learn groovy
+https://www.cnblogs.com/eastson/archive/2012/05/27/2519781.html
+https://blog.csdn.net/qq_35495763/article/details/85722207
 
 ## 执行shell语句并赋值
 hostname = "hostname".excute().text
