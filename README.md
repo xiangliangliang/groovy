@@ -55,10 +55,13 @@ println gb1["1"]
 a = ['aa','aa-a1-b1-s0','aa-a1-b1-s1','aa-a2-b1-s0','aa-a2-b1-s1','aa-a3']
 
 b = a.collect{it.replaceAll("-s.*","")}.unique()
+
 c = b.collect{ a.find{item -> item.contains(it)}}
 
 说明1 》 b = a.collect{it.replaceAll("-s.*","")}.unique() ==> [aa, aa-a1-b1, aa-a2-b1, aa-a3]
+
 说明2 》 c = b.collect{ a.find{item -> item.contains(it)}} ==> [aa, aa-a1-b1-s0, aa-a2-b1-s0, aa-a3]
+
 
 
 
