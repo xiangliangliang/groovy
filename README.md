@@ -22,7 +22,9 @@ That bring the bare necessities of life
 def words = text.tokenize()
 
 def wordFreq = [:]
+
 words.each{word->
     wordFreq[word] = wordFreq.get(word,0)+1
 }
+
 println wordFreq
