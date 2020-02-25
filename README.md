@@ -46,4 +46,20 @@ def errorCodeList = [
         
 gb1 = errorCodeList.groupBy{it.code}
 
-println gb1["1"] //[[code:1, language:2, content:3], [code:1, language:2, content:4], [code:1, language:3, content:5], [code:1, language:3, content:6], [code:1, language:2, content:4]]
+println gb1["1"] 
+
+//[[code:1, language:2, content:3], [code:1, language:2, content:4], [code:1, language:3, content:5], [code:1, language:3, content:6], [code:1, language:2, content:4]]
+
+## 筛选字符串相同的前缀
+
+a = ['aa','aa-a1-b1-s0','aa-a1-b1-s1','aa-a2-b1-s0','aa-a2-b1-s1','aa-a3']
+
+b = a.collect{it.replaceAll("-s.*","")}.unique()
+c = b.collect{ a.find{item -> item.contains(it)}}
+
+说明1 》 b = a.collect{it.replaceAll("-s.*","")}.unique() ==> [aa, aa-a1-b1, aa-a2-b1, aa-a3]
+说明2 》 c = b.collect{ a.find{item -> item.contains(it)}} ==> [aa, aa-a1-b1-s0, aa-a2-b1-s0, aa-a3]
+
+
+
+
