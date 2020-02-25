@@ -28,3 +28,22 @@ words.each{word->
 }
 
 println wordFreq
+
+[Look:1, for:1, the:3, bare:4, necessities:4, The:1, simple:1, Forget:1, about:1, your:2, worries:1, and:1, strife:1, I:1, mean:1, Old:1, Mother:1, Nuture's:1, recipes:1, That:1, bring:1, of:1, life:1]
+
+
+## groupBy
+
+def errorCodeList = [
+                [code: "1", language: "2", content: "3"],
+                [code: "1", language: "2", content: "4"],
+                [code: "1", language: "3", content: "5"],
+                [code: "1", language: "3", content: "6"],
+                [code: "2", language: "1", content: "3"],
+                [code: "2", language: "2", content: "3"],
+                [code: "1", language: "2", content: "4"]
+        ]
+        
+gb1 = errorCodeList.groupBy{it.code}
+
+println gb1["1"] //[[code:1, language:2, content:3], [code:1, language:2, content:4], [code:1, language:3, content:5], [code:1, language:3, content:6], [code:1, language:2, content:4]]
