@@ -62,6 +62,7 @@ c = b.collect{ a.find{item -> item.contains(it)}}
 
 说明2 》 c = b.collect{ a.find{item -> item.contains(it)}} ==> [aa, aa-a1-b1-s0, aa-a2-b1-s0, aa-a3]
 
+简化：b = a.collect{it.replaceAll("-s.*","")}.unique().collect{ a.find{item -> item.contains(it)}} ==> [aa, aa-a1-b1-s0, aa-a2-b1-s0, aa-a3]
 
 
 
