@@ -67,5 +67,17 @@ c = b.collect{ a.find{item -> item.contains(it)}}
 简化：b = a.collect{it.replaceAll("-s.*","")}.unique().collect{ a.find{item -> item.contains(it)}} ==> [aa, aa-a1-b1-s0, aa-a2-b1-s0, aa-a3]
 
 
+## 执行脚本.execute().text.readLines()
+
+rsp = 'cmd /c dir'.execute(null, new File("E:\\Jenkins")).text.readLines()
+
+rsp = rsp.findAll{item-> item.size()>0}.each{it.trim()}.each{println(it)}
+
+https://www.cnblogs.com/dreampursuer/p/5569266.html
+
+
+## 遍历文件目录
+
+https://blog.csdn.net/rainyRs/article/details/53184805
 
 
