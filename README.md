@@ -80,4 +80,29 @@ https://www.cnblogs.com/dreampursuer/p/5569266.html
 
 https://blog.csdn.net/rainyRs/article/details/53184805
 
+## 解析xml
+
+/**
+     test.xml 文件的内容如下：
+
+     <langs type="current">
+         <language1>Java</language1>
+         <language2>Groovy</language2>
+         <language3>JavaScript</language3>
+     </langs>
+ */
+ 
+ //一行代码就解析了xml
+ 
+ def langs = new XmlParser().parse("test.xml")//打印出node的属性println langs.attribute('type')
+ 
+ //对xml文件的遍历langs.each {println it.text()}
+ 
+ //输出
+current 
+Java
+Groovy
+JavaScript
+
+
 
