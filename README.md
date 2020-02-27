@@ -80,6 +80,25 @@ https://www.cnblogs.com/dreampursuer/p/5569266.html
 
 https://blog.csdn.net/rainyRs/article/details/53184805
 
+def list= []
+
+new File('D:\\Groovy\\Scripts').eachFile{ list<< it.name }
+    //eachFile() returns a list of File objects
+    
+assert list ==   ['Script.bat', 'File1.txt', 'File2.txt', 'Directory1', 'Directory2']
+
+list= []
+
+new File('D:\\Groovy\\Scripts').eachFileRecurse{ list<< it.name }
+
+assert list == ['Script.bat', 'File1.txt', 'File2.txt','Directory1', 'Directory2', 'SubDir1']
+ 
+list= []
+
+new File('D:\\Groovy\\Scripts').eachDir{ list<< it.name }
+
+assert list == ['Directory1', 'Directory2']
+
 ## 解析xml
 
 /**
@@ -110,5 +129,17 @@ JavaScript
 ## 各种文件操作
 https://blog.csdn.net/wensonlee/article/details/84620640
 
-
+assert new File('D:/Groovy/Scripts').list().toList() ==
+  ['Script.bat', 'File1.txt', 'File2.txt', 'Directory1', 'Directory2']
+  
+  
+  assert new File('D:/Groovy/Scripts').listFiles().toList()*.name ==
+  ['Script.bat', 'File1.txt', 'File2.txt', 'Directory1', 'Directory2']
+    
+    //listFiles() returns array of File objects
+    
+ assert new File('D:/Groovy/Scripts').listFiles(     {dir, file-> file ==~ /.*?\.txt/ } as FilenameFilter   ).toList()*.name == [ 'File1.txt', 'File2.txt' ]
+ 
+ 
+    
 
