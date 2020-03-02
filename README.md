@@ -141,5 +141,24 @@ assert new File('D:/Groovy/Scripts').list().toList() ==
  assert new File('D:/Groovy/Scripts').listFiles(     {dir, file-> file ==~ /.*?\.txt/ } as FilenameFilter   ).toList()*.name == [ 'File1.txt', 'File2.txt' ]
  
  
+ ## json 例子,筛选 enable=true的case
+ str = {
+"test_1":[
+	{"Enable":true},{"para":2}
+	],
+"test_2":[
+	{"Enable":false},{"para":0}
+	],
+"test_3":[
+	{"Enable":true},{"para":2}
+	],
+"test_4":[
+	{"Enable":true},{"para":3}
+	]
+}
+
+test_list = json_content.findAll{it.value[0].Enable==true}.keySet() // [test_1, test_3, test_4]
+
+
     
 
