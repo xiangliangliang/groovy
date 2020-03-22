@@ -170,7 +170,7 @@ test_list = json_content.findAll{it.value[0].Enable==true}.keySet() // [test_1, 
             File file = new File(fp) 
             def propMap = readJSON text : '{}' 
                 propMap.File_analyzed = file.readLines().find{it.contains("File analyzed")}.toString().split(":")[1].trim() - ']' 
-                propMap.defect_info = file.readLines().findAll{it.startsWith("\t") or it.contains("Defect")}.flatten().collect{it.replaceAll("\t","")}.toString().split(":")[1].trim() - ']' 
+                propMap.defect_info = file.readLines().findAll{it.startsWith("\t") or it.contains("Defect")}.collect{it.replaceAll("\t","")}.toString().split(":")[1].trim() - ']' 
             println propMap.toString()
             
         }
