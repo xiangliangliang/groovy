@@ -179,11 +179,19 @@ test_list = json_content.findAll{it.value[0].Enable==true}.keySet() // [test_1, 
    
    
 ## 筛选命令行
+
 curl -u xxx:xxx http://192.168.56?????? -o abc.txt
+
 fp = 'E:/Jenkins_20200204/abc.txt' 
+
 File file = new File(fp) 
+
 def ct=file.readLines().find{it.contains('jnlpUrl')}.toString()
+
 st = ct.indexOf('-jnlpUrl')
+
 end = ct.indexOf('</pre>')-1
+
 cmd = 'java -jar agent.jar ' + ct[st..end]
+
 println cmd
