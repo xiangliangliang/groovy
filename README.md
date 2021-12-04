@@ -1,3 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Hello, Bootstrap Table!</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+  </head>
+  <body>
+    <table data-toggle="table"
+			data-pagination="true"
+			data-side-pagination="client"
+			data-page-size="3">
+      <thead>
+        <tr>
+          <th>Item ID</th>
+          <th>Item Name</th>
+          <th>Item Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Item 1</td>
+          <td>$1</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Item 2</td>
+          <td>$2</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Item 3</td>
+          <td>$3</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Item 4</td>
+          <td>$4</td>
+        </tr>
+		<tr>
+          <td>5</td>
+          <td>Item 5</td>
+          <td>$5</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.js"></script>
+	<script>
+		$('#table').bootstrapTable({
+	  columns: [{
+		field: 'id',
+		title: 'Item ID'
+	  }, {
+		field: 'name',
+		title: 'Item Name'
+	  }, {
+		field: 'price',
+		title: 'Item Price'
+	  }],
+	  data: [{
+		id: 1,
+		name: 'Item 1',
+		price: '$1'
+	  }, {
+		id: 2,
+		name: 'Item 2',
+		price: '$2'
+	  }]
+	})
+	</script>
+  </body>
+</html>
+
+
+
+
+
+
 ## groovy
 learn groovy
 https://www.cnblogs.com/eastson/archive/2012/05/27/2519781.html
