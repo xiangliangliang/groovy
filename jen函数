@@ -140,6 +140,9 @@ sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner
 curl -u **** url/api/ce/task?id=？？？
 
 json 格式
+import groovy.json.JsonSlurperClassic
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 groovy.json.JsonOutput.prettyPrint(JsonOutput.toJson(json).toString())
 
 
@@ -152,3 +155,57 @@ def a = input message: 'select:', parameters: [extendedChoice (defaultValue: '',
 							type: 'PT_CHECKBOX', 
 							value: feature_list_tmp, 
 							visibleItemCount: 20)]
+
+
+单纯get
+def get_http_get_info(url){
+
+	try {
+		timeout(1){
+			println "[INFO GET]" + url
+			
+			// 创建url链接
+			def conn = new URL(url).openConnection()
+			conn.setRequestMethod("GET") 
+			conn.setRequestProperty("Content-Type", "application/json")
+			conn.setRequestProperty("authorization",BITBUCKET_TOKEN)	
+
+			def json = new JsonSlurperClassic().parseText(conn.content.text)
+			println "[INFO GET Rsp] " + json
+			return json
+			
+		}
+	} catch(err){
+		println "[ERROR GET ] get_http_get_info 有错误：" + err.toString()
+		return (new JsonSlurperClassic().parseText("{}"))
+	}
+}
+
+
+get 和 post
+def get_http_post_info(url, data) {
+	try {
+		timeout(1){
+			data = data.toString()
+			println "[INFO POST]" + url + " : " + groovy.json.JsonOutput.prettyPrint(data)
+			
+			// 创建url链接
+			def conn = new URL(url).openConnection()
+			conn.setRequestMethod("POST") 
+			conn.setRequestProperty("Content-Type", "application/json")
+			conn.setRequestProperty("authorization",BITBUCKET_TOKEN)
+			conn.doOutput = true
+
+			def writer = new OutputStreamWriter(conn.outputStream)
+			writer.write(data)
+			writer.flush()
+			writer.close()
+			
+			// 返回值
+			return (new JsonSlurperClassic().parseText(conn.content.text))
+		}		
+	} catch (err) {
+		println "[ERROR POST] get_http_post_info 有错误：" + err.toString()
+		return (new JsonSlurperClassic().parseText("{}"))
+	}
+}
