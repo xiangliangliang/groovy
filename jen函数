@@ -35,7 +35,14 @@ notifyBitbucket commitSha1: params.PULL_REQUEST_FROM_HASH,
 
 
 log解析
-logParser failBuildOnError: false, projectRulePath: "/home/dev/jenkins_files/logparse", unstableOnWarning: false, useProjectRule: true
+def ParseLog() {
+	stage('ParseLog') {
+		node ('fw') {
+			deleteDir()
+			logParser failBuildOnError: false, projectRulePath: "/home/dev/jenkins_files/logparse", unstableOnWarning: false, useProjectRule: true
+		}
+	}
+}
 
 
 下载commit
@@ -243,3 +250,20 @@ find ${sh_exe_path}${BUILD_TAG} -name "\${item}*" -print0 | xargs -0 rm -rf
 
 找slot的标签
 jenkins.model.Jenkins.instance.getNode(NODE_NAME).getLabelString().split(' ').toList()
+
+
+Merge 后的commit id
+def Get_Merge_Commit_ID() {
+	node ('fw') {		
+		try{
+			def merge_commit_url = BITBUCKET_URL + "rest/api/latest/projects/${real_project}/repos/${PULL_REQUEST_FROM_REPO_NAME}/pull-requests/${PULL_REQUEST_ID}/activities"
+			def json = get_http_get_info(merge_commit_url)
+			merge_commit_id = json.values.commit.id[0]	
+			println "[INFO] Merge 后的commit id是 ${merge_commit_id}"
+		} catch(err){
+			println "[ERROR] Get_Merge_Commit_ID 有错误： " + err.toString()
+			error "[ERROR] Get_Merge_Commit_ID 有错误"
+		}
+		return merge_commit_id
+	}
+}
