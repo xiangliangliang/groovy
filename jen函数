@@ -117,8 +117,11 @@ sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/nul
 
 扫描
 curl -u **** -X POST http://xxxx/api/project_branches/delete?branch=yyy&project=zzz
+
 export PATH=\$PATH:${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/build-wrapper-linux-x86:${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/bin
+
 ${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir output python ./build.py
+
 sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner 
 -Dsonar.projectKey=???
 -Dsonar.sources=???
@@ -133,3 +136,5 @@ sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner
 -Dsonar.cpp.file.suffixes=- 
 -Dsonar.objc.file.suffixes=- 
 -Dsonar.python.version=3.8
+
+curl -u **** url/api/ce/task?id=？？？
