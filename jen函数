@@ -231,3 +231,15 @@ def add_description(content){
 
 找文件
 findFiles(glob: '**/_log.txt')
+
+
+删文件
+find ${sh_exe_path}${BUILD_TAG} -name "\${item}*" -print0 | xargs -0 rm -rf
+
+
+切割文件
+[ `du -m ${uart_files[0].path} | cut -f 1` -gt 100 ] && split -b 100m -d -a 3 ${uart_files[0].path} ${uart_files[0].path}_ || echo "not_over_100m"
+
+
+找slot的标签
+jenkins.model.Jenkins.instance.getNode(NODE_NAME).getLabelString().split(' ').toList()
