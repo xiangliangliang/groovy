@@ -10,14 +10,17 @@ def get_web_txt(url){
 }
 config = readJSON text: get_web_txt("http://10.217.156.13:7990/projects/DTA/repos/panamera/raw/opt_log_bci/config?at=refs%2Fheads%2Fjenkins_backup_files")
 
+
 新建
 build job: 'xxx', parameters: [
 						string(name: 'Branch', value: params.PULL_REQUEST_FROM_BRANCH),
 						string(name: 'PULL_REQUEST_TO_BRANCH', value: params.PULL_REQUEST_TO_BRANCH)],
 						wait: false
-                  
+
+
 打散               
 Collections.shuffle(full_test_cases)
+
 
 通知bitbucket
 notifyBitbucket commitSha1: params.PULL_REQUEST_FROM_HASH,
@@ -29,3 +32,43 @@ notifyBitbucket commitSha1: params.PULL_REQUEST_FROM_HASH,
 											prependParentProjectKey: false,
 											projectKey: '',
 											stashServerBaseUrl: BITBUCKET_URL
+
+
+log解析
+logParser failBuildOnError: false, projectRulePath: "/home/dev/jenkins_files/logparse", unstableOnWarning: false, useProjectRule: true
+
+
+下载commit
+cmd = 'git init && git remote add origin ' +  URL + ' && git fetch origin ' + commitID + ' && git reset --hard FETCH_HEAD && git rev-parse HEAD'
+git rev-parse HEAD
+
+下载branch
+cmd = 'git clone --depth 1 --single-branch -b ' + Branch + ' ' + URL
+git rev-parse HEAD
+
+
+下载和merge
+withCredentials([sshUserPrivateKey(credentialsId: CREDENTIAL_ID, keyFileVariable: 'credential', passphraseVariable: '', usernameVariable: 'username')] ) {
+	rsp = sh label: '', returnStdout: true, script:
+		"""
+		# 初始化
+		git init
+
+		# download fw_repo
+		git remote add origin $URL
+		git fetch origin $Branch
+		git reset --hard FETCH_HEAD
+		git checkout -b $Branch
+
+		# download target branch like master
+		git checkout master
+		git fetch origin $MergeTarget
+		git reset --hard FETCH_HEAD
+
+		# merge fw_repo to master
+		echo '=========== pre_merge to master ============='
+		git merge $Branch -m 'pre_merge to target'
+	"""
+	rsp.split('\n').toList().each{println it}
+	}
+
