@@ -1,0 +1,167 @@
+// any 包含关系
+[1, 2, 3].any { it == 2 }
+![1, 2, 3].any { it > 3 }
+
+// average 平均值
+[1, 2, 6].average() = 3
+[1, 3].average { it * 10 } = 20
+['to', 'from'].average { it.size() } = 3
+
+// chop 按数字截取N组，剩余作为另一个
+[1, 2, 3, 4].chop(1,-1) == [[1], [2, 3, 4]]
+
+// chop 按数字截取N组:size,step
+[1, 2, 3, 4].chop(1) == [[1]]
+('a'..'h').chop(2, 4) == [['a', 'b'], ['c', 'd', 'e', 'f']]
+['a', 'b', 'c', 'd', 'e'].chop(3) == [['a', 'b', 'c']]
+['a', 'b', 'c', 'd', 'e'].chop(1, 2, 3) == [['a'], ['b', 'c'], ['d', 'e']]
+['a', 'b', 'c', 'd', 'e'].chop(1, 2, 3, 3, 3) == [['a'], ['b', 'c'], ['d', 'e'], [], []]
+
+// collate 递归按数字截取N组:size,step,keepRemainer
+[ 1, 2, 3, 4, 5, 6, 7 ].collate( 3 ) = [ [ 1, 2, 3 ], [ 4, 5, 6 ], [ 7 ] ]
+[ 1, 2, 3, 4, 5, 6, 7 ].collate( 3, false) = [ [ 1, 2, 3 ], [ 4, 5, 6 ]]
+[ 1, 2, 3, 4 ].collate( 3, 1 ) = [ [ 1, 2, 3 ], [ 2, 3, 4 ], [ 3, 4 ], [ 4 ] ]
+[ 1, 2, 3, 4 ].collate( 2, 2, true  ) == [ [ 1, 2 ], [ 3, 4 ] ]
+[ 1, 2, 3, 4 ].collate( 3, 1, true  ) == [ [ 1, 2, 3 ], [ 2, 3, 4 ], [ 3, 4 ], [ 4 ] ]
+[ 1, 2, 3, 4 ].collate( 3, 1, false ) == [ [ 1, 2, 3 ], [ 2, 3, 4 ] ]
+
+// collect 闭包转换 : 和python的列表推导式一样的
+[1,2,3].collect { it * 2 } = [2,4,6]
+[2,4,5,6].collect(new HashSet()) { (int)(it / 2) } = [1,2,3] as HashSet
+[2,4,5,6].collect{(int)(it / 2)}.toSet() = [1,2,3]
+[1, 10, 100, 1000].collect{ [it, it.toString().size()] } = [[1, 1], [10, 2], [100, 3], [1000, 4]]
+
+// collectEntries 列表转map，一定要[[]]这种格式的
+[1, 10, 100, 1000].collect{ [it, it.toString().size()] }.collectEntries() = [1:1, 10:2, 100:3, 1000:4]
+def letters = "abc"
+(0..2).collectEntries { index -> [index, letters[index]] } == [0:'a', 1:'b', 2:'c']
+(0..2).collectEntries { index -> [(index): letters[index]] } == [0:'a', 1:'b', 2:'c']
+(0..2).collectEntries( [:] ) { index -> [index, letters[index]] } == [0:'a', 1:'b', 2:'c']
+(0..2).collectEntries( [4:'d'] ) { index -> [(index+1): letters[index]] } == [1:'a', 2:'b', 3:'c', 4:'d']
+
+// collectMany 将生成的集合连接（平展）到单个列表中
+(1..10).collectMany{ it % 2 ? [] : [it**2, it**3] } = [4, 8, 16, 64, 36, 216, 64, 512, 100, 1000]
+['CAT', 'DOG', 'ELEPHANT'].collectMany{ it.size() > 3 ? [] : [it.toLowerCase()] } = ['cat', 'dog']
+['CAT', 'DOG', 'ELEPHANT'].collectMany(['ant', 'bee']){ it.size() > 3 ? [] : [it.toLowerCase()] } = ['ant', 'bee', 'cat', 'dog']
+
+// collectNested 赋新值
+[1,[2,3],[4],[]].collectNested { it * 2 } = [2,[4,6],[8],[]]
+
+// combinations 排列组合
+[['a', 'b'],[1, 2, 3]].combinations() = [['a', 1], ['b', 1], ['a', 2], ['b', 2], ['a', 3], ['b', 3]]
+[[2, 3],[4, 5, 6]].combinations {x,y -> x*y } = [8, 12, 10, 15, 12, 18]
+
+// count 统计个数
+[2,4,2,1,3,5,2,4,3].count{ it % 2 == 0 } = 5
+[2,4,2,1,3,5,2,4,3].count(4) = 2
+
+// countBy 分类统计
+[1,2,3,4,5].countBy { it % 2 } = [0:2, 1:3]
+[1,2,3,4,5,6].groupBy({ it % 2 }, { it < 4 })
+==> [1:[(true):[1, 3], (false):[5]], 0:[(true):[2], (false):[4, 6]]]
+
+// disjoint 如果两个可迭代对象的交集为空，则返回。true
+[1,2,3].disjoint([3,4,5]) = false
+[1,2].disjoint([3,4]) = true
+
+// drop 可迭代对象的头部删除给定数量的元素
+[ 'a', 'b', 'c' ].drop( 0 ) = [ 'a', 'b', 'c' ]
+[ 'a', 'b', 'c' ].drop( 2 ) = [ 'c' ]
+[ 'a', 'b', 'c' ].drop( 5 ) = []
+[ 'a', 'b', 'c' ].dropRight( 0 ) = [ 'a', 'b', 'c' ]
+[ 'a', 'b', 'c' ].dropRight( 2 ) = [ 'a' ]
+[ 'a', 'b', 'c' ].dropRight( 5 ) = []
+'horse'.toList().dropWhile{ it < 'r' } = ['r', 's', 'e']
+'horse'.toList().dropWhile{ it <= 'r' } = ['s', 'e']
+
+// eachCombination 对输入列表的每个组合应用一个函数。
+[[2, 3],[4, 5, 6]].eachCombination { println "Found $it" } 
+Found [2, 4]
+Found [3, 4]
+Found [2, 5]
+Found [3, 5]
+Found [2, 6]
+Found [3, 6]
+
+// eachPermutation 循环访问集合的所有排列，为每次迭代运行闭包。
+def permutations = []
+[1, 2, 3].eachPermutation{ permutations << it }
+permutations = [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
+
+// every 布尔值
+[3,4,5].every { it > 2 }
+
+// findResult（Object defaultResult， Closure condition）
+[1,2,3].findResult("default") { it > 1 ? "Found $it" : null } ==> Found 2
+[1,2,3].findResult("default") { it > 3 ? "Found $it" : null } ==> default
+
+// findResults()
+[1, null, 2, null, 3].findResults() = [1, 2, 3]
+[1,2,3].findResults { it > 1 ? "Found $it" : null } ==> ["Found 2", "Found 3"]
+
+// flatten() 扁平化
+[1,[2,3],[[4]],[],5].flatten() = [1,2,3,4,5]
+
+
+// indexed()
+["a", "b"].indexed() = [0: "a", 1: "b"]
+["a", "b"].indexed(5) = [5: "a", 6: "b"]
+
+// inits() 计算此可迭代对象的 init 值：第一个值将是可迭代对象中所有项的列表，最后一个值将是一个空列表，中间值是连续应用 init 对项的结果。
+[1, 2, 3, 4].inits() == [[1, 2, 3, 4], [1, 2, 3], [1, 2], [1], []]
+
+// intersect 交集
+[1,2,3,4,5].intersect([4,5,6,7,8]) = [4,5]
+def one = ['a', 'B', 'c', 'd']
+def two = ['b', 'C', 'd', 'e']
+def compareIgnoreCase = { it.toLowerCase() }
+assert one.intersect(two, compareIgnoreCase) == ['B', 'c', 'd']
+assert two.intersect(one, compareIgnoreCase) == ['b', 'C', 'd']
+
+// join 字符串连接
+[1,2,3].join(", ") = "1, 2, 3" 
+
+// max
+["hello","hi","hey"].max { it.length() } = "hello"
+
+// 数组加减乘除
+[1, "a", true, true, false, 5.3] - [true, 5.3] = [1, "a", false]
+['a', 'B', 'c', 'D', 'E'].minus(['b', 'C', 'D']) { it.toLowerCase() } = ['a', 'E']
+["a", 5, 5, true] - 5 = ["a", true]
+[1,2] + [3,4] = [1,2,3,4]
+[1,2] + 3 = [1,2,3]
+[1,2,3,1,2,3] = [1,2,3] * 2
+
+// sort 排序
+["hello","hi","hey"].sort { it.length() } = ["hi","hey","hello"]
+["hello","hi","Hey"].sort(false, String.CASE_INSENSITIVE_ORDER) = ["hello","Hey","hi"]
+
+// sum 求和
+[2,3,5,6].sum { it * 2 } = 4+6+10+12
+[1,2,3,4].sum(5) = 5+1+2+3+4
+[2,3,5,6].sum(50) { it * 2 } = 50+4+6+10+12
+
+// tail : 计算此可迭代对象的尾值：第一个值将是可迭代对象中所有项的列表，最后一个值将是一个空列表，中间值是连续应用 tail 对项的结果。
+[1, 2, 3, 4].tails() = [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4], []]
+
+// withIndex()
+["a", "b"].withIndex() = [["a", 0], ["b", 1]]
+["a", "b"].withIndex(5) = [["a", 5], ["b", 6]]
+
+// grep 获取有效数据
+[1, 2, 0, false, true, '', 'foo', [], [4, 5], null].grep() = [1, 2, true, 'foo', [4, 5]]
+['a', 'b', 'aa', 'bc', 3, 4.5].grep( ~/a+/ )  = ['a', 'aa']
+['a', 'b', 'aa', 'bc', 3, 4.5].grep( ~/../ )  = ['aa', 'bc']
+['a', 'b', 'aa', 'bc', 3, 4.5].grep( Number ) = [ 3, 4.5 ]
+['a', 'b', 'aa', 'bc', 3, 4.5].grep{ it.toString().size() = 1 } == [ 'a', 'b', 3 ]
+
+// split 按条件分组
+[1,2,3,4].split { it % 2 == 0 } = [[2,4],[1,3]]
+
+// drop
+'Groovy'.drop( 0 ) = 'Groovy'
+'Groovy'.drop( 2 ) = 'oovy'
+'Groovy'.drop( 7 ) = ''
+'Groovy'.dropWhile{ false } = 'Groovy'
+'Groovy'.dropWhile{ true } = ''
+'Groovy'.dropWhile{ true } = ''
