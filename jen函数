@@ -72,3 +72,30 @@ withCredentials([sshUserPrivateKey(credentialsId: CREDENTIAL_ID, keyFileVariable
 	rsp.split('\n').toList().each{println it}
 	}
 
+
+下线 - 1
+if [ ! -e jenkins-cli.jar ]; then
+	wget ${JENKINS_URL}jnlpJars/jenkins-cli.jar
+fi
+java -jar jenkins-cli.jar -s ${JENKINS_URL} -auth AutoMerge:AutoMerge offline-node $slot -m $reason
+java -jar jenkins-cli.jar -s ${JENKINS_URL} -auth AutoMerge:AutoMerge wait-node-offline $slot
+
+
+下线 - 2
+Jenkins.instance.getNode(per_slot).toComputer().setTemporarilyOffline(false)
+Jenkins.instance.getNode(per_slot).toComputer().doChangeOfflineCause("Offline_by_${BUILD_USER.split(' ').toList()[1]}_${BUILD_TAG}")
+currentBuild.description += "<br> ===== offline ${per_slot} 结束 ===== <br>"
+
+
+上线
+Jenkins.instance.getNode(per_node).toComputer().cliOnline()
+
+
+下线原因
+offline_reason = []
+for (aSlave in hudson.model.Hudson.instance.slaves) {
+	if(aSlave.getComputer().isOffline()){
+		offline_reason += aSlave.getComputer().getOfflineCause().toString().split('\n')[0]
+	}
+}
+offline_reason.unique().sort().each{println it+','}
