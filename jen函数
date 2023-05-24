@@ -209,3 +209,25 @@ def get_http_post_info(url, data) {
 		return (new JsonSlurperClassic().parseText("{}"))
 	}
 }
+
+
+// 获取job的最后一个状态信息 SUCCESS/FAILURE/UNSTABLE/ 和空
+def get_job_result(job) {
+	try {
+		return Jenkins.instance.getItemByFullName(job).getLastBuild().getResult().toString()
+	} catch (err) {
+		println err.toString()
+		return ""
+	}
+}
+
+
+// 在description中显示信息
+def add_description(content){	
+	def current_time =new Date().format("yyyy-MM-dd HH:mm:ss").toString()
+	currentBuild.description += "<p style='color:red'>错误信息 (${current_time}) : ${content}</p>"
+}
+
+
+找文件
+findFiles(glob: '**/_log.txt')
