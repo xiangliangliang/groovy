@@ -99,3 +99,37 @@ for (aSlave in hudson.model.Hudson.instance.slaves) {
 	}
 }
 offline_reason.unique().sort().each{println it+','}
+
+
+离线slot
+slots = []
+for (slot in hudson.model.Hudson.instance.slaves) {
+	if(slot.getComputer().isOffline() && !slot.getRootPath()){
+		slots.add(slot.name.toString())
+	}
+}
+slots.each{println it+","}
+
+
+ssh相关
+sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 user@ip cmd
+
+
+扫描
+curl -u **** -X POST http://xxxx/api/project_branches/delete?branch=yyy&project=zzz
+export PATH=\$PATH:${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/build-wrapper-linux-x86:${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/bin
+${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir output python ./build.py
+sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner 
+-Dsonar.projectKey=???
+-Dsonar.sources=???
+-Dsonar.cfamily.build-wrapper-output=output
+-Dsonar.branch.name=???
+-Dsonar.host.url=???
+-Dsonar.login=??? 
+-Dsonar.projectVersion=??? 
+-Dsonar.cfamily.threads=2 
+-Dsonar.cfamily.cache.enabled=false 
+-Dsonar.c.file.suffixes=- 
+-Dsonar.cpp.file.suffixes=- 
+-Dsonar.objc.file.suffixes=- 
+-Dsonar.python.version=3.8
