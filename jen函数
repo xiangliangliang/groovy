@@ -138,3 +138,17 @@ sonar-scanner-4.7.0.2747-linux/bin/sonar-scanner
 -Dsonar.python.version=3.8
 
 curl -u **** url/api/ce/task?id=？？？
+
+json 格式
+groovy.json.JsonOutput.prettyPrint(JsonOutput.toJson(json).toString())
+
+
+input 插件
+def a = input message: 'select:', parameters: [extendedChoice (defaultValue: '', description: '', 
+							multiSelectDelimiter: ',', 
+							name: 'feature_list', 
+							quoteValue: false, 
+							saveJSONParameterToFile: false, 
+							type: 'PT_CHECKBOX', 
+							value: feature_list_tmp, 
+							visibleItemCount: 20)]
