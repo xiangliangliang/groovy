@@ -8,7 +8,7 @@ def web_txt(url){
 		println "[ERROR GET ] web_txt 有错误：" + err.toString()
 	}
 }
-config = readJSON text: get_web_txt("http://10.217.156.13:7990/projects/DTA/repos/panamera/raw/opt_log_bci/config?at=refs%2Fheads%2Fjenkins_backup_files")
+config = readJSON text: get_web_txt(url)
 
 
 新建
