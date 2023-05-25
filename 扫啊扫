@@ -1,0 +1,13 @@
+def init_sonaqube_branch(){
+	/* 
+		问题： sonaqube 有个bug，增量检查代码，第一次扫描能检测出增量代码的issue，再扫描一次，就不显示了。
+		解决方法：为了解决这个问题，每次在执行sonqube扫描前，清除原来target-branch的记录
+	*/
+	withCredentials([usernameColonPassword(credentialsId: 'sonarqube_admin', variable: 'sonarqube_admin')]) {
+		def sonaqube_branch = branch.replaceAll('/','%2F')
+		def cmd = "curl -u ${sonarqube_admin} -X POST \"${sonarqube_url}/api/project_branches/delete?branch=user_${sonaqube_branch}&project=${projectKey}\""
+		println "cmd:" + cmd
+		sh cmd
+	}
+}
+
