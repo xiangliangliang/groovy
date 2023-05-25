@@ -1,0 +1,59 @@
+pipeline{
+
+	agent {
+		node{
+			label 'fw'
+			}
+		}
+
+	options {
+		buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')
+		timestamps()
+		timeout(1)
+	}
+	
+	parameters {
+	
+	extendedChoice bindings: '', description: '', groovyClasspath: '', groovyScript: '''offline_reason = []
+	for (aSlave in hudson.model.Hudson.instance.slaves) {
+		if(aSlave.getComputer().isOffline()){
+			offline_reason += aSlave.getComputer().getOfflineCause().toString().split(\'\\n\')[0]
+		}
+	}
+	offline_reason.unique().sort().each{println it+\',\'}''', multiSelectDelimiter: ',', name: 'selected_offline', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_CHECKBOX', visibleItemCount: 30
+	
+	}
+			
+	stages{
+		stage('recover_temporarily_offline_nodes'){
+			steps{
+				script{
+					// 显示用户姓名
+					wrap([$class: 'BuildUser']) {currentBuild.description = BUILD_USER}
+					
+					// 获取临时下线节点的原因和节点 reason:slots
+					temp_offline_reasons_nodes = [:]
+					for (aSlave in hudson.model.Hudson.instance.slaves) {
+						if(aSlave.getComputer().isOffline()){
+						offline_reason = aSlave.getComputer().getOfflineCause().toString().split('\n')[0]
+						if(offline_reason in temp_offline_reasons_nodes.keySet()){
+							temp_offline_reasons_nodes[offline_reason] = temp_offline_reasons_nodes[offline_reason] + ','+ aSlave.name.toString()
+						}else{
+							temp_offline_reasons_nodes[offline_reason] = aSlave.name.toString()
+							}
+						}
+					}
+
+					// 获取上线节点并上线
+					selected_offline.split(",").toList().each{ per_reason ->
+						temp_offline_reasons_nodes.get(per_reason).split(',').toList().each{ per_node->
+							Jenkins.instance.getNode(per_node).toComputer().cliOnline()
+							wrap([$class: 'BuildUser']) { currentBuild.description += "<br> ${per_reason}  --> ${per_node}"}
+						}
+					}
+					
+				}
+			}
+		} 
+	}
+}
