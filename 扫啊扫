@@ -44,3 +44,22 @@ def sonarscanner(branch_info){
 	println id
 	return id
 }
+
+
+
+// 8. 等待扫描结果。。。。。。
+timeout(2){
+	def wait_result = true
+	while ( wait_result ) {
+		withCredentials([usernameColonPassword(credentialsId: 'sonarqube_admin', variable: 'sonarqube_admin')]) {
+			def rsp = sh returnStdout: true, script: "curl -u ${sonarqube_admin} ${sonarqube_url}/api/ce/task?id=${id}"
+			def r = readJSON file: '', text: rsp
+			if ( r.task.get('status') == "SUCCESS" ) {
+				wait_result = false
+			}else {
+				println "[INFO] 等待扫描结果。。。。。。" + r.task.get('status')
+				sleep 10
+			}
+		}
+	}
+}
