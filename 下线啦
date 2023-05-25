@@ -1,0 +1,52 @@
+pipeline{
+
+	agent {
+		node{
+			label 'master'
+			}
+		}
+
+	options {
+		buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')
+		timestamps()
+		timeout(5)
+	}
+	
+	parameters {
+		
+		extendedChoice bindings: '', description: '', groovyClasspath: '', groovyScript: '''list = []
+			for (slot in hudson.model.Hudson.instance.slaves) {
+				if( !slot.getComputer().isOffline() && slot.getComputer().isAcceptingTasks() && !slot.name.contains("aaa")  ) {
+					list.add(slot.name)
+				}
+			}
+			list.each{println it+\',\'}''', multiSelectDelimiter: ',', name: 'slots', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_CHECKBOX', visibleItemCount: 20
+		
+	}
+
+			
+	stages{
+		stage("Offline slots"){
+			steps{
+				script{
+
+					// 显示用户姓名
+					wrap([$class: 'BuildUser']) {
+						
+						currentBuild.description = BUILD_USER
+
+						// 下线slot
+						slots.split(',').toList().each{ per_slot->
+							println "\n\n===== 开始 offline ${per_slot} ====="
+							Jenkins.instance.getNode(per_slot).toComputer().setTemporarilyOffline(false)
+							Jenkins.instance.getNode(per_slot).toComputer().doChangeOfflineCause("Offline_by_${BUILD_USER.split(' ').toList()[1]}_${BUILD_TAG}")
+							currentBuild.description += "<br> ===== offline ${per_slot} 结束 ===== <br>"
+						}
+
+					} // wrap
+
+				}
+			}
+		} 
+	}
+}
