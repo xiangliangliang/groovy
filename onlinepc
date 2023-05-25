@@ -1,0 +1,86 @@
+def online_pc(PC){
+
+		println "[INFO] 开始上线 ${PC}"
+		try{
+			PC = PC.split('-').toList()[0..2].join('-')	
+			
+			info = info.data.find{it.hostname == PC}
+			env.hostname = info.hostname
+			env.ip = info.ip
+			env.userr = info.user
+			
+			sh "[ `which sshpass` ] || suapp apt install -y sshpass && echo sshpass exist"
+			
+			try{
+				timeout(time: 2, unit: 'SECONDS') {
+					env.docker_image = sh label: '', returnStdout: true, script: """
+						sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 ${info.user}@${info.ip} 'echo ufsufs | sudo -S docker ps -a --format {{.Names}} | grep testpc'
+					"""
+				}
+			}catch(check_error){
+				currentBuild.result = "FAILURE"
+				currentBuild.description += "<p style='color:red'>错误信息: 请检查${PC} 是否联网 </p>"
+				error check_error.toString()
+			}
+
+			println " [INFO] workdir	  is -------------- $workdir"
+			println " [INFO] hostname	  is -------------- $hostname"
+			println " [INFO] ip			  is -------------- $ip"
+			println " [INFO] userr		  is -------------- $userr"
+			println " [INFO] docker_image is -------------- $docker_image"
+
+			content_info = sh label: '', returnStdout: true, script: '''
+					sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 \${userr}@\${ip} "echo ufsufs | sudo -S docker exec -u user docker_container bash -c 'cd \${workdir};sh lp*.sh;sleep 5 '"
+			'''
+			println content_info
+	}catch(err){
+		currentBuild.description += "[ERROR] ${PC} 有错误： " + err.toString()
+		currentBuild.result = 'FAILURE'
+	}
+}
+
+pipeline{
+	
+	agent {
+		node{
+			label 'online-pc'
+		}
+	}
+
+	options {
+		buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '50', numToKeepStr: '20')
+		timestamps()   
+		timeout(10)
+	}
+	
+	parameters {
+		
+		extendedChoice bindings: '', description: '仅显示已经下线的slot', groovyClasspath: '', groovyScript: '''slots = []
+			for (slot in hudson.model.Hudson.instance.slaves) {
+				if(slot.getComputer().isOffline() && !slot.getRootPath()){
+					slots.add(slot.name.toString())
+				}
+			}
+			slots.each{println it+","}''', multiSelectDelimiter: ',', name: 'PC', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_SINGLE_SELECT', visibleItemCount: 20
+		
+	}
+
+
+	stages{
+		
+		stage('online'){
+			steps{
+				script{
+					wrap([$class: 'BuildUser']) {currentBuild.description = BUILD_USER + "<br> $PC <br>"}
+				
+					env.workdir = '/home/dev/jenkins_slave/'
+					
+					println "\n\n-----------start--------------\n\n"
+					info_tmp = PC_list // ip列表
+					info = readJSON file: '', text: info_tmp
+					online_pc(PC)
+				}
+			}
+		}	
+	}
+}
