@@ -1,0 +1,57 @@
+// 根据branch下载
+def download_branch(){
+	deleteDir()
+	withCredentials([sshUserPrivateKey(credentialsId: CREDENTIAL_ID, keyFileVariable: 'credential', passphraseVariable: '', usernameVariable: 'username')]) {
+		def repo_folder = reposity.split("/")[-1].split("\\.")[0]
+		sh "git clone --depth 1 --single-branch -b ${origin_checkout_branch} ${reposity}"
+	
+		commit_id = sh label: '', returnStdout: true, script:
+			"""
+			mv $repo_folder/* $repo_folder/.git $repo_folder/.gitignore .
+			#*/
+			git rev-parse HEAD 
+			"""
+		println("clone repo by URL and branch name ==> result is ==> " + commit_id)
+	}
+	return commit_id
+}
+
+def download_pre_merge_branch(){
+	/*
+		params: PULL_REQUEST_TO_SSH_CLONE_URL -- repo url
+				PULL_REQUEST_FROM_BRANCH -- branch to be merge
+				PULL_REQUEST_TO_BRANCH -- target branch 
+	*/
+	deleteDir()
+	def repo_folder = reposity.split("/")[-1].split("\\.")[0]
+	withCredentials([sshUserPrivateKey(credentialsId: CREDENTIAL_ID, keyFileVariable: 'credential', passphraseVariable: '', usernameVariable: 'username')]) {
+	   rsp = sh label: '', returnStdout: true, script:
+			"""
+			# 初始化
+			git init
+			
+			# download test_repo
+			git remote add origin $reposity
+			git fetch origin $branch
+			git reset --hard FETCH_HEAD
+			git checkout -b $branch
+			
+			# download target branch
+			git checkout master
+			git fetch origin ${origin_checkout_branch}
+			git reset --hard FETCH_HEAD
+
+			# merge test_repo to target
+			echo '=========== pre_merge to target ============='
+			git merge $branch -m 'pre_merge to target'			
+			"""
+		rsp.split('\n').toList().each{println it}
+		
+		commit_id = sh label: '', returnStdout: true, script:
+			"""
+			git rev-parse HEAD 
+			"""
+		println("merge ==> result is ==> " + commit_id)
+		return commit_id
+	}
+}
