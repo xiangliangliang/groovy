@@ -1,0 +1,55 @@
+pc_list = [
+			"abc":"ip"
+		]
+
+pipeline {
+    agent {
+		node{
+			label 'abc'
+		}
+   } 
+
+    stages {
+        stage('check') {
+            steps {
+				script{
+					
+					// pc_list_json = readJSON file: '', text: 'http://url/output'.toURL().text
+					
+					for ( pc in pc_list.keySet() ) {
+						
+							try{
+								timeout(time: 5, unit: 'SECONDS') {
+									sh """
+										sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 user@${pc_list.get(pc)} 'sudo docker exec -u user docker_container bash -c hourly_connect_jenkins.sh'
+									"""
+								}
+							}catch(err){
+								println err.toString()
+							}
+						
+					}
+				}
+            }
+        }
+    }
+}
+
+--------------------------------------------------------------------
+
+hourly_connect_jenkins.sh
+
+
+#!/bin/bash
+
+cd ~/ 
+jenkins_file=`find . -name "lp*.sh" |grep jenkins`
+
+if [ -n ${jenkins_file} ];then
+
+	jenkins_file_path=${jenkins_file%/*}
+	jenkins_file_name=${jenkins_file##*/}
+	cd ${jenkins_file_path}
+	sh ${jenkins_file_name}
+	
+fi
