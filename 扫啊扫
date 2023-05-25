@@ -11,3 +11,36 @@ def init_sonaqube_branch(){
 	}
 }
 
+
+// 代码扫描
+def sonarscanner(branch_info){
+	def info = branch_info.toString().trim()
+	command = """-Dsonar.projectKey=${projectKey} \
+							-Dsonar.sources=${sources} \
+							-Dsonar.cfamily.build-wrapper-output=output \
+							-Dsonar.branch.name=user_${branch} \
+							-Dsonar.host.url=${sonarqube_url} \
+							-Dsonar.login=${login_id} \
+							-Dsonar.projectVersion=${info} \
+							-Dsonar.cfamily.threads=2 \
+							-Dsonar.cfamily.cache.enabled=false \
+						"""
+	if ( developer in ["fte"] ){
+		command += """-Dsonar.c.file.suffixes=- \
+								-Dsonar.cpp.file.suffixes=- \
+								-Dsonar.objc.file.suffixes=- \
+						"""
+	}
+	
+	command += "-Dsonar.python.version=3.8"
+	
+	rsp = sh returnStdout: true, script: """
+		cp -rf ~/jenkins_files/sonar-scanner-${sonarqube_version}-linux/ .
+		${env.WORKSPACE}/sonar-scanner-${sonarqube_version}-linux/bin/sonar-scanner $command
+		"""
+	println rsp
+	
+	def id = rsp.trim().split('\n').toList().find{it.contains("${sonarqube_url}/api/ce/task")}.split('=').toList()[-1]
+	println id
+	return id
+}
