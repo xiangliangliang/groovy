@@ -16,6 +16,15 @@ def download_branch(){
 	return commit_id
 }
 
+
+// '根据commit下载测试代码
+def download_commit(){
+	 withCredentials([sshUserPrivateKey(credentialsId: CREDENTIAL_ID, keyFileVariable: 'credential', passphraseVariable: '', usernameVariable: 'username')]) {
+		cmd = 'git init && git remote add origin ' +  test_repo + ' && git fetch origin ' + milestone_branch_panamera + ' && git reset --hard FETCH_HEAD && git rev-parse HEAD'
+		sh "${cmd}"
+	}
+}
+
 def download_pre_merge_branch(){
 	/*
 		params: PULL_REQUEST_TO_SSH_CLONE_URL -- repo url
