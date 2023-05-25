@@ -1,0 +1,129 @@
+stage('create_agent'){
+    
+	node('fw'){
+		
+		jenkins_server = 1
+		remoteFS = "/home/dev/jenkins_slave/"
+		currentBuild.description = pc + " " + ip + " " + count 
+		
+		println "\n\n===== step1 下载配置文件 ====="
+		
+		withCredentials([usernamePassword(credentialsId: 'a883b737-4fff-4e6e-9a11-7d6cd96bbcac', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+			sh """
+				set +x
+				
+				if [ ! -e jenkins-cli.jar ];then 
+					echo " download jenkins-cli -----> "
+					wget ${JENKINS_URL}/jnlpJars/jenkins-cli.jar
+				fi
+				
+				curl -s -u ${user}:${pwd}  url -o node_template.xml
+			"""
+		}
+		
+
+        println "\n\n===== step2 创建新的slot ====="
+		count = count.toInteger()
+        (1..count).toList().each{
+			def slot = pc + "-s" + it.toString().padLeft(2,'0')
+			println slot
+			withCredentials([usernamePassword(credentialsId: 'a883b737-4fff-4e6e-9a11-7d6cd96bbcac', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+				sh 'cat node_template.xml | sed "s#<name>.*</name>#<name>' + slot + '</name>#g" | sed "s#<remoteFS>.*</remoteFS>#<remoteFS>' + remoteFS + slot+ '</remoteFS>#g" | sed "s#<label>.*</label>#<label>${label}</label>#g" > new_node.xml'
+				sh "java -jar jenkins-cli.jar -s \${JENKINS_URL} -auth ${user}:${pwd} create-node < new_node.xml"
+			}
+        }
+        
+        println "\n\n===== step3 创建启动文件 ====="
+        dir('slots_sh') { 
+            sh """
+				./setup_jenkins_slot_file.sh ${jenkins_server} ${pc} ${count}
+				[ `which sshpass` ] || suapp apt install -y sshpass && echo sshpass exist
+			""" 
+        }
+
+		println "\n\n===== step4 上线 ====="
+			sh """
+				sshpass -p ufsufs ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 8022 ufs@${ip} "echo ufsufs | sudo -S docker exec -u ??? docker_container bash -c 'online_jenkins_slot.sh 1 '"
+			"""
+		
+    }
+}
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+
+
+setup_jenkins_slot_file.sh
+
+#!/bin/bash
+
+if [ -z ${1} ];then echo "Please setup Jenkins Server" ; exit 1; fi
+if [ -z ${2} ];then echo "Please setup PC" ; exit 1; fi
+if [ -z ${3} ];then echo "Please setup Slot number" ; exit 1;fi
+
+echo "Jenkins_Server is "$1
+echo "PC is "$2
+echo "Slot number is "$3
+
+case $1 in
+	1) ip=18
+	   script_file="${2}_server1.sh"
+	   jenkins_dir="jenkins_slave"
+	;;
+	2) ip=58
+           script_file="${2}_server2.sh"
+	   jenkins_dir="jenkins_slave_2"
+	;;	
+        *)exit 1
+	;;
+esac 
+
+[ -e ${script_file} ] && echo > ${script_file} || touch ${script_file}
+chmod 777 ${script_file}
+
+for i in `seq ${3}`
+do
+	i=`printf "%02d" ${i}`
+	slot="${2}-s${i}"
+	
+	curl -s  -u AutoMerge:'AutoMerge' http://10.217.124.${ip}:8080/computer/${slot}/ -o slot.xml
+	secret=$(grep '-secret ' slot.xml | head -n 1 | sed 's/^[ ]*//g' | cut -d " " -f12)
+	echo "============${i}-${secret}=========="
+	echo "java -jar agent.jar -jnlpUrl http://10.217.124.${ip}:8080/computer/${slot}/slave-agent.jnlp -secret ${secret} -workDir \"/home/dev/${jenkins_dir}/${slot}\" &" >> ${script_file}
+done
+
+cat ${script_file}
+
+
+
+------------------------------------------------------------------------------------------------------------------
+
+online_jenkins_slot.sh
+
+#!/usr/bin/env bash
+
+cd ~/
+
+
+echo " [Step 1] Clear all old jenkins slot"
+pkill -f agent.jar
+rm -rf jenkins*
+
+echo " [Step 2] Setup jenkins slot"
+if [ ${1} -ne 1 ];then
+  mkdir jenkins_slave_${1}
+  cd jenkins_slave_${1}
+else
+  mkdir jenkins_slave
+  cd jenkins_slave
+fi
+
+cp /url/`hostname`_server${1}.sh .
+
+cp /url/agent.jar .
+
+./`hostname`_server${1}.sh
+
+echo " [Finish] ${0}"
