@@ -1,0 +1,25 @@
+sed某行后面插入： sed -i "/xxx/i \   ${cmd}" filename
+-----
+
+sed 追加：echo passwd | sudo -S sed -i '/某一行/a content' filename
+-----
+
+添加root 账号： echo root:abcdefg| chpasswd
+-----
+
+enable_root_ssh：
+#!/bin/bash
+
+# Step 1 : Change root password
+sudo change_root_pwd.sh
+
+# Step 2 : enable root ssh
+grep 'PermitRootLogin yes' /etc/ssh/sshd_config 
+
+if [ $? -ne 0 ];then 
+	printf "\E[1;31m \n [info] `hostname` root ssh NOT OK -- go on set \n \E[0m"
+	echo ufsufs | sudo -S sed -i '$aPermitRootLogin yes' /etc/ssh/sshd_config
+	echo ufsufs | sudo -S /etc/init.d/ssh restart  
+fi
+-----
+
